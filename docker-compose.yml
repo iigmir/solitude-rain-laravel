@@ -1,0 +1,41 @@
+version: "3.3"
+
+services:
+    ldb:
+        image: "bitnami/mariadb:latest"
+        environment:
+            ALLOW_EMPTY_PASSWORD: yes
+            MARIADB_USER: "bn_myapp"
+            MARIADB_DATABASE: "bitnami_myapp" 
+        networks:
+            - "laravel-network"
+        volumes:
+            - "./db:/bitnami/mariadb"
+    laravel:
+        image: "bitnami/laravel:latest"
+        ports:
+            - "8000:8000"
+        environment:
+            DB_HOST: ldb
+            DB_PORT: 3306
+            DB_USERNAME: "bn_myapp" 
+            DB_DATABASE: "bitnami_myapp"
+        networks:
+            - "laravel-network"
+        volumes:
+            - "./app:/app"
+    pma:
+        image: phpmyadmin/phpmyadmin
+        ports:
+            - "8080:80"
+        depends_on:
+            - ldb
+        networks:
+            - "laravel-network"
+        environment:
+            PMA_HOST: ldb
+            PMA_PORT: 3306
+
+networks:
+    laravel-network:
+        name: laravel-network
